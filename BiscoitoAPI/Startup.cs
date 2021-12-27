@@ -31,7 +31,7 @@ namespace BiscoitoAPI
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            var conection = Configuration["ConnectionStrings:MongoDB"];
+
             #region SWAGGER
             services.AddSwaggerGen(c =>
             {
