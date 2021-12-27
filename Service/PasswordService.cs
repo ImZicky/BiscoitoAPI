@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Model.DTO;
-using Repository;
+using Repository.Mongo;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -18,29 +18,30 @@ namespace Service
     {
 
         private readonly IMapper _mapper;
+        private readonly IPasswordRepository _rep;
 
-        public PasswordService()
+
+        public PasswordService(IPasswordRepository rep)
         {
             var biscoitoMapper = new BiscoitoMapperService();
             _mapper = biscoitoMapper.CreateMapper();
+            _rep = rep;
         }
+
 
         public async Task<List<PasswordDTO>> GetSenhas()
         {   
 
             var lstPasswordsDTO = new List<PasswordDTO>();
 
-            var rep = new PasswordRepository();
 
-            var lstPasswordsEtt = await rep.GetSenhas();
+            var lstPasswordsEtt = await _rep.GetSenhas();
 
 
             foreach (var p in lstPasswordsEtt)
             {
                 lstPasswordsDTO.Add(_mapper.Map<PasswordDTO>(p));
             }
-
-
 
             return lstPasswordsDTO;
         }

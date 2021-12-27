@@ -7,6 +7,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using Repository;
+using Repository.Mongo;
+using Repository.SQLServer;
+using Service;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,7 +31,8 @@ namespace BiscoitoAPI
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-
+            var conection = Configuration["ConnectionStrings:MongoDB"];
+            #region SWAGGER
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo
@@ -78,6 +83,15 @@ namespace BiscoitoAPI
                     }
                 });
             });
+            #endregion
+
+            #region TRANSIENTS
+            services.AddTransient<IPasswordService, PasswordService>();
+            services.AddTransient<IPasswordRepository, PasswordRepository>();
+            services.AddTransient<IUserService, UserService>();
+            services.AddTransient<IUserRepository, UserRepository>();
+
+            #endregion
 
             services.AddAuthentication();
             services.AddDistributedMemoryCache();
