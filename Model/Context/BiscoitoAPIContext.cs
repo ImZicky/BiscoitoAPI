@@ -13,6 +13,7 @@ namespace Model.Context
     {
 
 
+
         public BiscoitoAPIContext(DbContextOptions<BiscoitoAPIContext> options) : base(options)
         {
         }
@@ -22,8 +23,7 @@ namespace Model.Context
             base.OnModelCreating(builder);
 
 
-
-
         }
+
     }
 }

@@ -11,7 +11,8 @@ using System.Threading.Tasks;
 namespace BiscoitoAPI.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [ApiVersion("1")]
+    [Route("api/v{version:apiVersion}/[controller]")]
     public class BiscoitoDbSeedController : Controller
     {
 
@@ -19,6 +20,7 @@ namespace BiscoitoAPI.Controllers
         private readonly RoleManager<IdentityRole> roleManager;
         private readonly IConfiguration _conf;
 
+        #region CONSTRUCTOR
         public BiscoitoDbSeedController(UserManager<BiscoitoAPIUser> userManager, RoleManager<IdentityRole> roleManager, IConfiguration conf)
         {
             this.userManager = userManager;
@@ -26,13 +28,15 @@ namespace BiscoitoAPI.Controllers
             _conf = conf;
         }
 
+        #endregion
 
+        #region GET
         [HttpGet]
         public async Task SeedEssentials()
         {
             var roles = Enum.GetValues<Roles>();
-         
-            foreach(var role in roles)
+
+            foreach (var role in roles)
             {
                 //Seed Roles
                 await roleManager.CreateAsync(new IdentityRole(role.ToString()));
@@ -48,9 +52,20 @@ namespace BiscoitoAPI.Controllers
             }
         }
 
-        //[Authorize]
-        //[Route("api/[controller]")]
-        //[ApiController]
+        #endregion
+
+        #region POST
+
+        #endregion 
+
+        #region PUT
+
+        #endregion
+
+        #region DELETE
+
+        #endregion
+
 
 
     }

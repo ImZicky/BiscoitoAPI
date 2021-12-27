@@ -16,15 +16,16 @@ using System.Threading.Tasks;
 namespace BiscoitoAPI.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [ApiVersion("1")]
+    [Route("api/v{version:apiVersion}/[controller]")]
     public class UserController : ControllerBase
     {
-
         private readonly IEmailSender _emailSender;
         private readonly ILogger<UserController> _logger;
         private readonly UserManager<BiscoitoAPIUser> _userManager;
         private readonly SignInManager<BiscoitoAPIUser> _signInManager;
 
+        #region CONSTRUTOR
         public UserController(IEmailSender emailSender, ILogger<UserController> logger, UserManager<BiscoitoAPIUser> userManager, SignInManager<BiscoitoAPIUser> signInManager)
         {
             _emailSender = emailSender;
@@ -32,6 +33,15 @@ namespace BiscoitoAPI.Controllers
             _userManager = userManager;
             _signInManager = signInManager;
         }
+
+        #endregion
+
+        #region GET
+
+
+        #endregion
+
+        #region POST
 
         [HttpPost]
         [Route("/login")]
@@ -50,6 +60,55 @@ namespace BiscoitoAPI.Controllers
                 _logger.LogError($"ERROR: {e.Message} | {DateTime.Now:F}");
                 return false;
             }
+        }
+
+
+        [HttpPost]
+        [Route("/signin")]
+        [ProducesResponseType(typeof(bool), 200)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<bool> Signin([FromBody] UserSignInDTO userDTO)
+        {
+            try
+            {
+                var user = new BiscoitoAPIUser()
+                {
+                    UserName = userDTO.Email,
+                    Email = userDTO.Email
+                };
+
+                var result = await _userManager.CreateAsync(user, userDTO.Password);
+                if (result.Succeeded)
+                {
+                    var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+                    var callbackUrl = Url.Page(
+                        "/Account/ConfirmEmail",
+                        pageHandler: null,
+                        values: new { area = "Identity", userId = user.Id, code, returnUrl = "" },
+                        protocol: Request.Scheme);
+
+                    await _emailSender.SendEmailAsync(userDTO.Email, "Confirm your email",
+                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+
+                    if (_userManager.Options.SignIn.RequireConfirmedAccount)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.LogError($"ERROR: {e.Message} | {DateTime.Now:F}");
+                return false;
+            }
+
+            return false;
         }
 
 
@@ -94,56 +153,18 @@ namespace BiscoitoAPI.Controllers
         //    }
         //}
 
-        [HttpPost]
-        [Route("/signin")]
-        [ProducesResponseType(typeof(bool), 200)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<bool> Signin([FromBody] UserSignInDTO userDTO)
-        {
-            try
-            {
-                var user = new BiscoitoAPIUser()
-                {
-                    UserName = userDTO.Email, 
-                    Email = userDTO.Email 
-                };
+        #endregion
 
-                var result = await _userManager.CreateAsync(user, userDTO.Password);
-                if (result.Succeeded)
-                {
-                    var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                    code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-                    var callbackUrl = Url.Page(
-                        "/Account/ConfirmEmail",
-                        pageHandler: null,
-                        values: new { area = "Identity", userId = user.Id, code, returnUrl = "" },
-                        protocol: Request.Scheme);
-
-                    await _emailSender.SendEmailAsync(userDTO.Email, "Confirm your email",
-                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
-
-                    if (_userManager.Options.SignIn.RequireConfirmedAccount)
-                    {
-                        return false;
-                    }
-                    else
-                    {
-                        return true;
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                _logger.LogError($"ERROR: {e.Message} | {DateTime.Now:F}");
-                return false;
-            }
-
-            return false;
-        }
+        #region PUT
 
 
 
+        #endregion
+
+        #region DELETE
+
+
+        #endregion
 
     }
 }

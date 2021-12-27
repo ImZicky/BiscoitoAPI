@@ -2,11 +2,13 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using Model.Context;
 using Repository;
 using Repository.Mongo;
 using Repository.SQLServer;
@@ -91,6 +93,10 @@ namespace BiscoitoAPI
             services.AddTransient<IUserService, UserService>();
             services.AddTransient<IUserRepository, UserRepository>();
 
+            #endregion
+
+            #region SQL SERVER
+            services.AddDbContext<BiscoitoAPIContext>(x => x.UseSqlServer(Configuration.GetConnectionString("SQLServer")));
             #endregion
 
             services.AddAuthentication();
